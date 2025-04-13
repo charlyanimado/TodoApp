@@ -1,78 +1,80 @@
 package com.juandgaines.todoapp
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.juandgaines.todoapp.data.FakeTaskLocalDataSource
-import com.juandgaines.todoapp.domain.Task
+import androidx.compose.ui.unit.dp
 import com.juandgaines.todoapp.ui.theme.TodoAppTheme
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             TodoAppTheme() {
-                val fakeDatasource = FakeTaskLocalDataSource
+                var isShown by remember { mutableStateOf(false) }
 
-                var text by remember { mutableStateOf("") }
-                LaunchedEffect(true) {
-
-                    launch {
-                        fakeDatasource.tasksFlow.collect {
-                            Log.d("MainActivity", "Tasks: $it")
-                            text = it.toString()
-                        }
+                Column (
+                    modifier = Modifier.padding(56.dp)
+                ) {
+                    if (isShown) {
+                        Text("This is a message")
                     }
-
-                    launch {
-                        fakeDatasource.addTask(
-                            Task(
-                                id = "1",
-                                title = "Task 1",
-                                description = "Description 1"
-                            )
-                        )
-                        fakeDatasource.addTask(
-                            Task(
-                                id = "2",
-                                title = "Task 2",
-                                description = "Description 2"
-                            )
-                        )
-
-                        fakeDatasource.getTaskById("1")?.let {
-                            val updatedTask = it.copy(title = "Updated Task 1")
-                            fakeDatasource.updateTask(updatedTask)
-                        }
-
-                        fakeDatasource.deleteAllTasks()
-                    }
-                }
-
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Text(
-                        text = text,
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize()
+                        "Hello, world!",
+                        modifier = Modifier.clickable {
+                            isShown = !isShown
+                        }
                     )
                 }
             }
         }
     }
 }
+
+@Composable
+fun HelloWorldView() {
+    var isShown by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier.padding(56.dp)
+    ) {
+        MessageText(isShown)
+        HelloWorldText {
+            isShown = !isShown
+        }
+    }
+}
+
+@Composable
+fun MessageText(isShown: Boolean) {
+    if (isShown) {
+        Text("This is a message")
+    }
+}
+
+@Composable
+fun HelloWorldText(onClick: () -> Unit) {
+    Text(
+        "Hello, world!",
+        modifier = Modifier.clickable {
+            onClick()
+        }
+    )
+}
+
 
